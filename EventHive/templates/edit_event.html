@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Edit Event - EventHive</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>EventHive</h1>
+    <nav>
+      <a href="/organizer.html">Organizer Dashboard</a>
+      <a href="/event_bookings.html">View Bookings</a>
+      <a href="#" onclick="logoutUser()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container active">
+    <h2>Edit Event</h2>
+    <label>Select Event</label>
+    <select id="eventSelect"></select>
+
+    <form id="editEventForm">
+      <label>Title</label>
+      <input type="text" id="title" required>
+
+      <label>Description</label>
+      <textarea id="description" required></textarea>
+
+      <label>Category</label>
+      <input type="text" id="category" required>
+
+      <label>Date</label>
+      <input type="date" id="date" required>
+
+      <label>Time</label>
+      <input type="time" id="time" required>
+
+      <label>Location</label>
+      <input type="text" id="location" required>
+
+      <button type="submit">Update Event</button>
+    </form>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const res = await fetch("/events/");
+      const events = await res.json();
+      const select = document.getElementById("eventSelect");
+
+      events.forEach(ev => {
+        const option = document.createElement("option");
+        option.value = ev.id;
+        option.textContent = `${ev.title} | ${ev.date}`;
+        select.appendChild(option);
+      });
+
+      select.addEventListener("change", async () => {
+        const event_id = select.value;
+        const resEvent = await fetch(`/events/${event_id}`);
+        const event = await resEvent.json();
+        
+        if (resEvent.ok) {
+          document.getElementById("title").value = event.title;
+          document.getElementById("description").value = event.description;
+          document.getElementById("category").value = event.category;
+          document.getElementById("date").value = event.date;
+          document.getElementById("time").value = event.time;
+          document.getElementById("location").value = event.location;
+        }
+      });
+
+      document.getElementById("editEventForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const event_id = select.value;
+        const data = {
+          title: document.getElementById("title").value,
+          description: document.getElementById("description").value,
+          category: document.getElementById("category").value,
+          date: document.getElementById("date").value,
+          time: document.getElementById("time").value,
+          location: document.getElementById("location").value
+        };
+
+        const resUpdate = await fetch(`/events/${event_id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const response = await resUpdate.json();
+        if (resUpdate.ok) {
+          alert("Event updated successfully!");
+          window.location.href = "/organizer.html";
+        } else {
+          alert(response.error);
+        }
+      });
+
+      if (events.length) select.dispatchEvent(new Event("change"));
+    });
+  </script>
+</body>
+</html>

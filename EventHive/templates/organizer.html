@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Organizer Dashboard - EventHive</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>EventHive</h1>
+        <nav>
+            <a href="/create_event.html">Create New Event</a>
+            <a href="/event_bookings.html">View Bookings</a>
+            <a href="#" onclick="logoutUser()">Logout</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>Organizer Dashboard</h2>
+        <p id="userInfo"></p>
+        
+        <h3>All Events</h3>
+        <div id="organizerEvents" class="event-list"></div>
+    </main>
+</body>
+</html>

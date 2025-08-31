@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>EventHive - Home</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>EventHive</h1>
+    <nav>
+      <a href="/login.html">Login</a>
+      <a href="/register.html">Register</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Upcoming Events</h2>
+    <div id="eventsContainer" class="event-list"></div>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", loadEvents);
+  </script>
+</body>
+</html>

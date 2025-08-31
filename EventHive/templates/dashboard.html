@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - EventHive</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>EventHive</h1>
+    <nav>
+      <a href="/booking.html">Book Tickets</a>
+      <a href="/tickets.html">My Tickets</a>
+      <a href="#" onclick="logoutUser()">Logout</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>My Dashboard</h2>
+    <p id="userInfo"></p>
+    
+    <h3>Upcoming Events</h3>
+    <div id="eventsContainer" class="event-list"></div>
+
+    <h3>My Bookings</h3>
+    <div id="bookingsContainer" class="bookings-grid"></div>
+  </main>
+</body>
+</html>

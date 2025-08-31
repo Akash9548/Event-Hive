@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Book Tickets - EventHive</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>EventHive</h1>
+    <nav>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/tickets.html">My Tickets</a>
+      <a href="#" onclick="logoutUser()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container active">
+    <h2>Book Tickets</h2>
+    <form id="bookingForm">
+      <label>Event</label>
+      <select id="eventSelect"></select>
+
+      <label>Ticket Type</label>
+      <select id="ticketType">
+        <option value="General">General</option>
+        <option value="VIP">VIP</option>
+      </select>
+
+      <label>Quantity</label>
+      <input type="number" id="ticketQuantity" min="1" value="1" required>
+
+      <label>Amount (INR)</label>
+      <input type="number" id="ticketAmount" min="1" value="500" required>
+
+      <button type="submit">Pay & Book</button>
+    </form>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Load events into select
+      const res = await fetch("/events/");
+      const events = await res.json();
+      const select = document.getElementById("eventSelect");
+      
+      events.forEach(ev => {
+        const option = document.createElement("option");
+        option.value = ev.id;
+        option.textContent = `${ev.title} | ${ev.date}`;
+        select.appendChild(option);
+      });
+
+      // Handle booking form submit
+      document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const user_id = localStorage.getItem("user_id");
+        if (!user_id) {
+          alert("Please login first.");
+          window.location.href = "/login.html";
+          return;
+        }
+
+        const event_id = document.getElementById("eventSelect").value;
+        const ticket_type = document.getElementById("ticketType").value;
+        const quantity = document.getElementById("ticketQuantity").value;
+        const amount = document.getElementById("ticketAmount").value;
+        const customer_email = localStorage.getItem("user_email"); // ← ADD THIS LINE
+
+        // Create Razorpay order
+        const orderRes = await fetch("/bookings/create-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id, event_id, ticket_type, quantity, amount, customer_email }) // ← ADD customer_email HERE
+        });
+
+        const orderData = await orderRes.json();
+        if (!orderRes.ok) {
+          alert(orderData.error);
+          return;
+        }
+
+        const options = {
+          key: orderData.key,
+          amount: orderData.amount,
+          currency: orderData.currency,
+          name: "EventHive",
+          description: `Tickets for Event ID ${event_id}`,
+          order_id: orderData.order_id,
+          handler: async function(response) {
+            // Verify payment
+            const verifyRes = await fetch("/bookings/verify-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                booking_id: orderData.booking_id,
+                customer_email: customer_email // ← ADD THIS LINE
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok && verifyData.status === "success") {
+              if (verifyData.email === "sent") {
+                alert("Payment successful! Ticket sent to your email.");
+              } else {
+                alert("Payment successful! But email sending failed.");
+              }
+              window.location.href = "/dashboard.html";
+            } else {
+              alert("Payment failed or signature invalid.");
+            }
+          },
+          prefill: { 
+            name: localStorage.getItem("user_name") || "",
+            email: localStorage.getItem("user_email") || "",
+            contact: localStorage.getItem("user_phone") || ""
+          },
+          theme: { color: "#3399cc" }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      });
+    });
+  </script>
+</body>
+</html>

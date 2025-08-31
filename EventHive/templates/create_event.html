@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Event - EventHive</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script src="/static/js/main.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>EventHive</h1>
+    <nav>
+      <a href="/organizer.html">Organizer Dashboard</a>
+      <a href="/event_bookings.html">View Bookings</a>
+      <a href="#" onclick="logoutUser()">Logout</a>
+    </nav>
+  </header>
+
+  <main class="container active">
+    <h2>Create New Event</h2>
+    <form id="createEventForm">
+      <label>Title</label>
+      <input type="text" id="title" required>
+
+      <label>Description</label>
+      <textarea id="description" required></textarea>
+
+      <label>Category</label>
+      <input type="text" id="category" required>
+
+      <label>Date</label>
+      <input type="date" id="date" required>
+
+      <label>Time</label>
+      <input type="time" id="time" required>
+
+      <label>Location</label>
+      <input type="text" id="location" required>
+
+      <button type="submit">Create Event</button>
+    </form>
+  </main>
+
+  <script>
+    document.getElementById("createEventForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const data = {
+        title: document.getElementById("title").value,
+        description: document.getElementById("description").value,
+        category: document.getElementById("category").value,
+        date: document.getElementById("date").value,
+        time: document.getElementById("time").value,
+        location: document.getElementById("location").value
+      };
+
+      const res = await fetch("/events/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      const response = await res.json();
+      if (res.ok) {
+        alert("Event created successfully!");
+        window.location.href = "/organizer.html";
+      } else {
+        alert(response.error);
+      }
+    });
+  </script>
+</body>
+</html>
